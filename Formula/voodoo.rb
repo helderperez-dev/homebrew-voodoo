@@ -8,13 +8,15 @@ class Voodoo < Formula
   depends_on "uv"
   depends_on "python@3.12"
 
-  # Skip dylib fixup — vendored Python .so files lack header padding
-  skip_clean :all
-
   def install
     # Use uv instead of pip to avoid truststore bug on macOS Tahoe
     system "uv", "venv", libexec, "--python", "3.12"
     system "uv", "pip", "install", "--python", libexec/"bin/python", "voodoo-framework"
+
+    # Remove .so files whose Mach-O headers lack padding for Homebrew's dylib fixup.
+    # These packages have pure-Python fallbacks or are optional at runtime.
+    rm_rf Dir.glob(libexec/"lib/python*/site-packages/jiter/*.so")
+
     bin.install_symlink libexec/"bin/voodoo"
   end
 
