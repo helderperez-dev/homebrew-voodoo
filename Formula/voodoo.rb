@@ -16,17 +16,18 @@ class Voodoo < Formula
     system "uv", "tool", "install", "voodoo-framework", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
-
-    # Replace broken Python symlinks (pointing to deleted temp dirs) with Homebrew Python
     brew_python = Formula["python@3.12"].bin/"python3.12"
+
+    # Replace ALL python symlinks (including broken ones) with Homebrew Python.
+    # Use lstat to detect broken symlinks (File.exist? returns false for those).
     %w[python python3 python3.12].each do |name|
       link = tool_bin/name
-      next unless link.exist? && link.symlink?
+      next unless File.symlink?(link.to_s)
       FileUtils.rm_f(link)
       File.symlink(brew_python, link)
     end
 
-    # Rewrite shebang in the voodoo script to use the local python
+    # Rewrite shebang in the voodoo script
     voodoo_script = tool_bin/"voodoo"
     if voodoo_script.exist?
       content = File.read(voodoo_script)
