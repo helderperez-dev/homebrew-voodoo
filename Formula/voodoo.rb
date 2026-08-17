@@ -11,7 +11,7 @@ class Voodoo < Formula
   def install
     # Use uv instead of pip to avoid truststore bug on macOS Tahoe.
     # Pin to Homebrew's Python directly so uv doesn't download a temp copy.
-    py = Formula["python@3.12"].bin/"python3"
+    py = Formula["python@3.12"].bin/"python3.12"
     system "uv", "venv", libexec, "--python", py
     system "uv", "pip", "install", "--python", libexec/"bin/python", "voodoo-framework"
 
