@@ -9,7 +9,7 @@ class Voodoo < Formula
   depends_on "python@3.12"
 
   # Skip dylib fixup — vendored Python .so files lack header padding
-  skip_clean libexec
+  skip_clean :all
 
   def install
     # Use uv instead of pip to avoid truststore bug on macOS Tahoe
