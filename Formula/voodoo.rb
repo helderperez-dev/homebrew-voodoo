@@ -9,12 +9,13 @@ class Voodoo < Formula
   depends_on "python@3.12"
 
   def install
-    # Use uv instead of pip to avoid truststore bug on macOS Tahoe
-    system "uv", "venv", libexec, "--python", "3.12"
+    # Use uv instead of pip to avoid truststore bug on macOS Tahoe.
+    # Use --system-site-packages so uv uses the Homebrew Python, not a temp download.
+    system "uv", "venv", libexec, "--python", Formula["python@3.12"].opt_bin/"python3", "--system-site-packages"
     system "uv", "pip", "install", "--python", libexec/"bin/python", "voodoo-framework"
 
     # Remove .so files whose Mach-O headers lack padding for Homebrew's dylib fixup.
-    # These packages have pure-Python fallbacks or are optional at runtime.
+    # jiter (pydantic/openai dependency) ships without -headerpad_max_install_names.
     rm_rf Dir.glob(libexec/"lib/python*/site-packages/jiter/*.so")
 
     bin.install_symlink libexec/"bin/voodoo"
