@@ -10,8 +10,9 @@ class Voodoo < Formula
 
   def install
     # Use uv instead of pip to avoid truststore bug on macOS Tahoe.
-    # Use --system-site-packages so uv uses the Homebrew Python, not a temp download.
-    system "uv", "venv", libexec, "--python", Formula["python@3.12"].opt_bin/"python3", "--system-site-packages"
+    # Pin to Homebrew's Python directly so uv doesn't download a temp copy.
+    py = Formula["python@3.12"].bin/"python3"
+    system "uv", "venv", libexec, "--python", py
     system "uv", "pip", "install", "--python", libexec/"bin/python", "voodoo-framework"
 
     # Remove .so files whose Mach-O headers lack padding for Homebrew's dylib fixup.
