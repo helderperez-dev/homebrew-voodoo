@@ -15,6 +15,9 @@ class Voodoo < Formula
     bin.install_symlink libexec/"bin/voodoo"
   end
 
+  # Skip dylib fixup — vendored Python .so files lack header padding
+  skip_clean libexec
+
   test do
     assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
   end
