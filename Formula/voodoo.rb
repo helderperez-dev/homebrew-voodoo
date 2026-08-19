@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Fast, Animated, AI-Powered Python Web Framework"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-1.15.0.tar.gz"
-  sha256 "5d7ae37ccf43bf43684aea142aa698b6273fc5233979e1b9f91dc5ad81969587"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-1.15.1.tar.gz"
+  sha256 "3d3d64c03efa2b15f1ee3a5c0b086a6d4f62830729bd4a31f7e07fd9267b25c9"
   license "MIT"
 
   depends_on "uv"
