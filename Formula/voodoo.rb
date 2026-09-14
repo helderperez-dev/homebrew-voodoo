@@ -8,23 +8,13 @@ class Voodoo < Formula
   depends_on "uv"
   depends_on "python@3.12"
 
-  # Voodoo Store ships a prebuilt Mach-O Python extension whose install name is
-  # intentionally @rpath-based. Homebrew's generic post-install dylib relocation
-  # cannot expand its load-command header, so leave this extension untouched.
-  skip_clean "libexec/voodoo-framework/lib/python3.12/site-packages/voodoo_store/_native.abi3.so"
-
   def install
-    # Use uv tool install — uv manages its own Python for the install step
-    # (avoids pip's truststore bug and Homebrew's broken platform.mac_ver()
-    # on macOS Tahoe 26.x). After install, rewrite shebangs to use Homebrew's Python.
     ENV["UV_TOOL_DIR"] = libexec.to_s
-    # Pin the exact version so Homebrew always installs the formula version.
     system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
     brew_python = Formula["python@3.12"].bin/"python3.12"
 
-    # Replace ALL python symlinks (including broken ones) with Homebrew Python.
     %w[python python3 python3.12].each do |name|
       link = tool_bin/name
       next unless File.symlink?(link.to_s)
@@ -32,7 +22,6 @@ class Voodoo < Formula
       File.symlink(brew_python, link)
     end
 
-    # Rewrite shebang in the voodoo script.
     voodoo_script = tool_bin/"voodoo"
     if voodoo_script.exist?
       content = File.read(voodoo_script)
@@ -41,13 +30,30 @@ class Voodoo < Formula
       chmod("+x", voodoo_script)
     end
 
+    # Homebrew rewrites every Mach-O it finds in the keg, including Python
+    # extension modules whose @rpath install name is already correct. The
+    # prebuilt Voodoo Store extension has no spare Mach-O header room for that
+    # rewrite. Hide it from the relocation pass as gzip data and restore it in
+    # post_install, which runs after Homebrew has finished keg relocation.
+    native = Dir[libexec/"**/site-packages/voodoo_store/_native.abi3.so"].first
+    odie "voodoo_store native extension not found" if native.nil?
+    system "gzip", "-f", native
+
     # Existing compatibility workaround for jiter's Mach-O wheel.
     rm_rf Dir.glob(libexec/"**/site-packages/jiter/*.so")
 
     bin.install_symlink tool_bin/"voodoo"
   end
 
+  def post_install
+    native_gz = Dir[libexec/"**/site-packages/voodoo_store/_native.abi3.so.gz"].first
+    return if native_gz.nil?
+
+    system "gzip", "-d", native_gz
+  end
+
   test do
     assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
+    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
   end
 end
