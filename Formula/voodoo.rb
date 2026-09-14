@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.7.1.tar.gz"
-  sha256 "47ceda74dc0068441a141b18e0a958abd1572dd248fb740e7fa7cc1a43d73431"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.7.2.tar.gz"
+  sha256 "ff85a3e56b18578d4f5c88eddc1d4d02b1c40027709d954a1b0e8c6668f1cdb4"
   license "MIT"
 
   depends_on "uv"
@@ -54,5 +54,17 @@ class Voodoo < Formula
   test do
     assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
     system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
+    system bin/"voodoo", "create", "smoke-app"
+    cd testpath/"smoke-app" do
+      system libexec/"voodoo-framework/bin/python3.12", "-c", <<~PY
+        import runpy
+        from pathlib import Path
+        from starlette.testclient import TestClient
+        ns = runpy.run_path('main.py', run_name='brew_smoke')
+        with TestClient(ns['app']) as client:
+            assert client.get('/').status_code == 200
+        assert Path('.voodoo/application.vstore').exists()
+      PY
+    end
   end
 end
