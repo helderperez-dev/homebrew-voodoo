@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.7.0.tar.gz"
-  sha256 "6feaa3003fe2d292a5feb952288c8eaec444517cf41a94d2b39937423ce52f27"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.7.1.tar.gz"
+  sha256 "47ceda74dc0068441a141b18e0a958abd1572dd248fb740e7fa7cc1a43d73431"
   license "MIT"
 
   depends_on "uv"
@@ -30,16 +30,15 @@ class Voodoo < Formula
       chmod("+x", voodoo_script)
     end
 
-    # Homebrew rewrites every Mach-O it finds in the keg, including Python
-    # extension modules whose @rpath install name is already correct. The
-    # prebuilt Voodoo Store extension has no spare Mach-O header room for that
-    # rewrite. Hide it from the relocation pass as gzip data and restore it in
-    # post_install, which runs after Homebrew has finished keg relocation.
+    # Homebrew rewrites every Mach-O it finds in the keg. Voodoo
+    # Store's prebuilt @rpath extension is already relocatable but has
+    # no spare Mach-O header room for Homebrew's longer install name.
+    # Hide it as gzip data during keg relocation and restore it in
+    # post_install after Homebrew's relocation pass has completed.
     native = Dir[libexec/"**/site-packages/voodoo_store/_native.abi3.so"].first
     odie "voodoo_store native extension not found" if native.nil?
     system "gzip", "-f", native
 
-    # Existing compatibility workaround for jiter's Mach-O wheel.
     rm_rf Dir.glob(libexec/"**/site-packages/jiter/*.so")
 
     bin.install_symlink tool_bin/"voodoo"
