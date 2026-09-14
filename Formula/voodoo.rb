@@ -8,21 +8,23 @@ class Voodoo < Formula
   depends_on "uv"
   depends_on "python@3.12"
 
+  # Voodoo Store ships a prebuilt Mach-O Python extension whose install name is
+  # intentionally @rpath-based. Homebrew's generic post-install dylib relocation
+  # cannot expand its load-command header, so leave this extension untouched.
+  skip_clean "libexec/voodoo-framework/lib/python3.12/site-packages/voodoo_store/_native.abi3.so"
+
   def install
     # Use uv tool install — uv manages its own Python for the install step
     # (avoids pip's truststore bug and Homebrew's broken platform.mac_ver()
     # on macOS Tahoe 26.x). After install, rewrite shebangs to use Homebrew's Python.
     ENV["UV_TOOL_DIR"] = libexec.to_s
-    # Pin the exact version — an unpinned  would pull
-    # whatever is latest on PyPI at  time and ignore the
-    # url/sha256 above, shipping stale framework code.
+    # Pin the exact version so Homebrew always installs the formula version.
     system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
     brew_python = Formula["python@3.12"].bin/"python3.12"
 
     # Replace ALL python symlinks (including broken ones) with Homebrew Python.
-    # Use lstat to detect broken symlinks (File.exist? returns false for those).
     %w[python python3 python3.12].each do |name|
       link = tool_bin/name
       next unless File.symlink?(link.to_s)
@@ -30,7 +32,7 @@ class Voodoo < Formula
       File.symlink(brew_python, link)
     end
 
-    # Rewrite shebang in the voodoo script
+    # Rewrite shebang in the voodoo script.
     voodoo_script = tool_bin/"voodoo"
     if voodoo_script.exist?
       content = File.read(voodoo_script)
@@ -39,7 +41,7 @@ class Voodoo < Formula
       chmod("+x", voodoo_script)
     end
 
-    # Remove .so files whose Mach-O headers lack padding for Homebrew's dylib fixup.
+    # Existing compatibility workaround for jiter's Mach-O wheel.
     rm_rf Dir.glob(libexec/"**/site-packages/jiter/*.so")
 
     bin.install_symlink tool_bin/"voodoo"
