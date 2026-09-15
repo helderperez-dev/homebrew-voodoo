@@ -10,6 +10,7 @@ class Voodoo < Formula
 
   def install
     ENV["UV_TOOL_DIR"] = libexec.to_s
+    ENV["UV_INDEX_CACHE_TTL"] = "0"
     system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
