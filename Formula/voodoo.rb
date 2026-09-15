@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.8.1.tar.gz"
-  sha256 "e3f0922e14e8e7e1a866c3e38b9215bf1336d35d1d5c22930ee897569e10d72a"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.8.2.tar.gz"
+  sha256 "ec5bae510d11b885d3ab6fbf4a9cb9b3e4f938af3ce1a4aa62cdecdf4289330b"
   license "MIT"
 
   depends_on "uv"
