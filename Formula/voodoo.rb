@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.8.2.tar.gz"
-  sha256 "ec5bae510d11b885d3ab6fbf4a9cb9b3e4f938af3ce1a4aa62cdecdf4289330b"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-2.8.3.tar.gz"
+  sha256 "d6944c26ace894bea946bf4d87a57ec44125465549e9cee25ae32f4590a38ae8"
   license "MIT"
 
   depends_on "uv"
@@ -10,7 +10,6 @@ class Voodoo < Formula
 
   def install
     ENV["UV_TOOL_DIR"] = libexec.to_s
-    ENV["UV_INDEX_CACHE_TTL"] = "0"
     system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
