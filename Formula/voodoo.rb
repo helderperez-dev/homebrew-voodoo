@@ -56,8 +56,13 @@ class Voodoo < Formula
   end
 
   test do
-    assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
-    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
+    # The rich help banner text is not stable across CLI releases; the
+    # usage line is.
+    assert_match "Usage: voodoo", shell_output("#{bin}/voodoo --help")
+    # voodoo_store lives in the tool env (libexec), not in Homebrew's
+    # python@3.12 site-packages. Importing it with the tool python also
+    # proves the native extension survived the gzip/relocate dance above.
+    system libexec/"voodoo-framework/bin/python3.12", "-c", "import voodoo_store"
     system bin/"voodoo", "create", "smoke-app"
     cd testpath/"smoke-app" do
       system libexec/"voodoo-framework/bin/python3.12", "-c", <<~PY
