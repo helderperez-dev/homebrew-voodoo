@@ -10,7 +10,11 @@ class Voodoo < Formula
 
   def install
     ENV["UV_TOOL_DIR"] = libexec.to_s
-    system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
+    # --refresh-package: never trust a cached simple index for the target
+    # package. Otherwise an install right after a PyPI publish can resolve
+    # against a stale index entry and fail with an empty candidate set.
+    system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12",
+           "--refresh-package", "voodoo-framework"
 
     tool_bin = libexec/"voodoo-framework/bin"
     brew_python = Formula["python@3.12"].bin/"python3.12"
