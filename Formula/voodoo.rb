@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-3.1.0.tar.gz"
-  sha256 "5e7ad6308f2e3fff8951d70939ec5db9d64fdb7db9163054539965866bf77bfc"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-3.2.0.tar.gz"
+  sha256 "f7edf49f42de5ba68d1f97ded832797919daa912320df52949df3016fc45a502"
   license "MIT"
 
   depends_on "uv"
@@ -10,11 +10,7 @@ class Voodoo < Formula
 
   def install
     ENV["UV_TOOL_DIR"] = libexec.to_s
-    # --refresh-package: never trust a cached simple index for the target
-    # package. Otherwise an install right after a PyPI publish can resolve
-    # against a stale index entry and fail with an empty candidate set.
-    system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12",
-           "--refresh-package", "voodoo-framework"
+    system "uv", "tool", "install", "voodoo-framework==#{version}", "--python", "3.12"
 
     tool_bin = libexec/"voodoo-framework/bin"
     brew_python = Formula["python@3.12"].bin/"python3.12"
@@ -56,23 +52,21 @@ class Voodoo < Formula
   end
 
   test do
-    # The rich help banner text is not stable across CLI releases; the
-    # usage line is.
-    assert_match "Usage: voodoo", shell_output("#{bin}/voodoo --help")
-    # voodoo_store lives in the tool env (libexec), not in Homebrew's
-    # python@3.12 site-packages. Importing it with the tool python also
-    # proves the native extension survived the gzip/relocate dance above.
-    system libexec/"voodoo-framework/bin/python3.12", "-c", "import voodoo_store"
-    system bin/"voodoo", "create", "smoke-app"
+    assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
+    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
+    system bin/"voodoo", "new", "smoke-app", "--no-install"
     cd testpath/"smoke-app" do
       system libexec/"voodoo-framework/bin/python3.12", "-c", <<~PY
-        import runpy
         from pathlib import Path
         from starlette.testclient import TestClient
-        ns = runpy.run_path('main.py', run_name='brew_smoke')
-        with TestClient(ns['app']) as client:
+        from voodoo import App
+        app = App()
+        with TestClient(app) as client:
             assert client.get('/').status_code == 200
+            assert client.get('/about').status_code == 200
+            assert client.get('/users/42').status_code == 200
         assert Path('.voodoo/application.vstore').exists()
+        assert list(Path('.').rglob('*.db')) == []
       PY
     end
   end
