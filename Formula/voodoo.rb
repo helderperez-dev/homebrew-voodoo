@@ -52,8 +52,9 @@ class Voodoo < Formula
   end
 
   test do
-    assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
-    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
+    assert_match "voodoo #{version}", shell_output("#{bin}/voodoo version")
+    shell_output("#{bin}/voodoo --help")
+    system libexec/"voodoo-framework/bin/python3.12", "-c", "import voodoo_store"
     system bin/"voodoo", "new", "smoke-app", "--no-install"
     cd testpath/"smoke-app" do
       system libexec/"voodoo-framework/bin/python3.12", "-c", <<~PY
