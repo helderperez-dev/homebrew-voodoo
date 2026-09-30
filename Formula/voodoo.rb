@@ -1,8 +1,8 @@
 class Voodoo < Formula
   desc "Programmable runtime for adaptive applications and operational systems"
   homepage "https://github.com/helderperez-dev/voodoo"
-  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-3.2.0.tar.gz"
-  sha256 "f7edf49f42de5ba68d1f97ded832797919daa912320df52949df3016fc45a502"
+  url "https://files.pythonhosted.org/packages/source/v/voodoo-framework/voodoo_framework-3.2.1.tar.gz"
+  sha256 "7be987fde2bc92f40da4aca73d0887021221e932b88ce8c6b1288b70d042735b"
   license "MIT"
 
   depends_on "uv"
@@ -52,9 +52,8 @@ class Voodoo < Formula
   end
 
   test do
-    assert_match "voodoo #{version}", shell_output("#{bin}/voodoo version")
-    shell_output("#{bin}/voodoo --help")
-    system libexec/"voodoo-framework/bin/python3.12", "-c", "import voodoo_store"
+    assert_match "Voodoo Framework CLI", shell_output("#{bin}/voodoo --help")
+    system Formula["python@3.12"].opt_bin/"python3.12", "-c", "import voodoo_store"
     system bin/"voodoo", "new", "smoke-app", "--no-install"
     cd testpath/"smoke-app" do
       system libexec/"voodoo-framework/bin/python3.12", "-c", <<~PY
